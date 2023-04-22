@@ -17,10 +17,12 @@ bot = Bot(token=bot_token)
 storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
 
+
 # Включаем логирование, чтобы не пропустить важные сообщения
 logging.basicConfig(level=logging.INFO)
 
 saved_data = {}
+
 
 # Форма, которая хранит информацию о пользователе
 class Form(StatesGroup):
@@ -31,6 +33,13 @@ class Form(StatesGroup):
 class Form2(StatesGroup):
     other_currency = State()
     sum = State()
+
+
+#Обработчик команды старт
+@dp.message_handler(commands=['start'])
+async def process_command1(message: Message):
+    await message.reply("Привет! Я простой бот для конвертации валют) ")
+
 
 #Сохрание данных значения
 @dp.message_handler(commands=['save_currency'])
@@ -45,7 +54,7 @@ async def process_currency1(message: types.Message, state: FSMContext):
     await state.update_data(currency=message.text)
     await state.get_data()
     await Form.number.set()
-     await message.reply("Введите курс валюты к рублю")
+    await message.reply("Введите курс валюты к рублю")
 
 
 @dp.message_handler(state=Form.number)
@@ -60,14 +69,13 @@ async def process_currency2(message: types.Message, state: FSMContext):
 
 @dp.message_handler(commands=['convert'])
 async def procces_command2(message: types.Message):
-    #logging.log(f"Bot transfers to convert state after {message.text}")
     await Form2.other_currency.set()
     await message.reply("Введите название валюты")
 
 
 @dp.message_handler(state=Form2.other_currency)
 async def process_other_currency(message: types.Message, state: FSMContext):
-await state.update_data(other_currency=message.text)
+    await state.update_data(other_currency=message.text)
     await state.get_data()
     await Form2.sum.set()
     await message.reply("Сумма валюты")
